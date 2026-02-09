@@ -76,6 +76,7 @@
   // AI Provider (at least one set required):
   // - ANTHROPIC_API_KEY: Direct Anthropic API key
   // - OPENAI_API_KEY: Direct OpenAI API key
+  // - GOOGLE_AI_STUDIO_API_KEY: Google AI Studio API key (for Gemini models)
   // - Cloudflare AI Gateway (alternative to direct keys):
   //   - CLOUDFLARE_AI_GATEWAY_API_KEY: API key for requests through the gateway
   //   - CF_AI_GATEWAY_ACCOUNT_ID: Your Cloudflare account ID
