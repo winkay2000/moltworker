@@ -257,15 +257,6 @@ if (process.env.GOOGLE_AI_STUDIO_API_KEY && !process.env.CF_AI_GATEWAY_MODEL) {
     console.log('Google Gemini configured with Gemini 2.5 Flash (native API)');
 }
 
-// Tool permission restrictions (security hardening)
-config.agents = config.agents || {};
-config.agents.defaults = config.agents.defaults || {};
-config.agents.defaults.tools = config.agents.defaults.tools || {};
-config.agents.defaults.tools.profile = 'coding';
-config.agents.defaults.tools.exec = { ask: 'always', security: 'sandbox' };
-config.agents.defaults.tools.deny = ['gateway', 'cron', 'nodes'];
-console.log('Tool permissions configured: coding profile, exec requires approval');
-
 // Telegram configuration
 // Overwrite entire channel object to drop stale keys from old R2 backups
 // that would fail OpenClaw's strict config validation (see #47)
