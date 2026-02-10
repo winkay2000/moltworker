@@ -249,7 +249,7 @@ if (process.env.GOOGLE_AI_STUDIO_API_KEY && !process.env.CF_AI_GATEWAY_MODEL) {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         apiKey: process.env.GOOGLE_AI_STUDIO_API_KEY,
         api: 'google-generative-ai',
-        models: [{ id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', contextWindow: 1048576, maxTokens: 8192 }],
+        models: [{ id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', contextWindow: 131072, maxTokens: 8192 }],
     };
     config.agents = config.agents || {};
     config.agents.defaults = config.agents.defaults || {};
