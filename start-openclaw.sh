@@ -305,6 +305,39 @@ config.tools = config.tools || {};
 config.tools.deny = ['browser', 'canvas', 'nodes', 'gateway', 'discord', 'apply_patch', 'group:sessions'];
 console.log('Denied tools:', config.tools.deny.join(', '));
 
+// ---- Token cost optimization ----
+config.agents = config.agents || {};
+config.agents.defaults = config.agents.defaults || {};
+
+// Reduce workspace file injection per message (default 20000)
+config.agents.defaults.bootstrapMaxChars = 5000;
+
+// Aggressive compaction: compress history earlier and harder
+config.agents.defaults.compaction = {
+    mode: 'aggressive',
+    reserveTokensFloor: 5000,
+    maxHistoryShare: 0.5,
+};
+
+// Aggressive context pruning: trim old tool outputs
+config.agents.defaults.contextPruning = {
+    mode: 'aggressive',
+    keepLastAssistants: 2,
+    softTrimRatio: 0.2,
+    hardClearRatio: 0.4,
+};
+
+// Disable thinking/reasoning mode (can inflate tokens 10-50x)
+config.agents.defaults.models = config.agents.defaults.models || {};
+config.agents.defaults.models['google-gemini/gemini-2.5-flash'] = {
+    params: { thinking: { type: 'disabled' } },
+};
+
+// Reduce heartbeat frequency (each heartbeat = full API call with full context)
+config.agents.defaults.heartbeat = { every: '1h' };
+
+console.log('Token optimization: bootstrapMaxChars=5000, aggressive compaction/pruning, thinking=off, heartbeat=1h');
+
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log('Configuration patched successfully');
 EOFPATCH
