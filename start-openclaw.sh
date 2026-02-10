@@ -302,7 +302,7 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 // Deny tools that are unavailable or unnecessary in container environment
 // NOTE: cron is intentionally kept enabled for scheduled morning reports
 config.tools = config.tools || {};
-config.tools.deny = ['browser', 'canvas', 'nodes', 'gateway', 'discord', 'apply_patch'];
+config.tools.deny = ['browser', 'canvas', 'nodes', 'gateway', 'discord', 'apply_patch', 'group:sessions'];
 console.log('Denied tools:', config.tools.deny.join(', '));
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
