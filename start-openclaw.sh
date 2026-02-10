@@ -302,7 +302,7 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 // Deny tools that are unavailable or unnecessary in container environment
 // NOTE: cron is intentionally kept enabled for scheduled morning reports
 config.tools = config.tools || {};
-config.tools.deny = ['browser', 'canvas', 'nodes', 'gateway', 'discord', 'apply_patch', 'group:sessions'];
+config.tools.deny = ['browser', 'canvas', 'nodes', 'gateway', 'apply_patch', 'group:sessions'];
 console.log('Denied tools:', config.tools.deny.join(', '));
 
 // ---- Token cost optimization ----
@@ -325,10 +325,13 @@ config.agents.defaults.contextPruning = {
     hardClearRatio: 0.4,
 };
 
-// Disable thinking/reasoning mode (can inflate tokens 10-50x)
+// Disable thinking/reasoning mode globally (can inflate tokens 10-50x)
+config.agents.defaults.thinkingDefault = 'off';
+
+// Gemini 2.5 uses thinkingBudget (not thinkingLevel) to control thinking
 config.agents.defaults.models = config.agents.defaults.models || {};
 config.agents.defaults.models['google-gemini/gemini-2.5-flash'] = {
-    params: { thinking: { type: 'disabled' } },
+    params: { thinkingBudget: 0 },
 };
 
 // Reduce heartbeat frequency (each heartbeat = full API call with full context)
