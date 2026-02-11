@@ -249,7 +249,7 @@ if (process.env.GOOGLE_AI_STUDIO_API_KEY && !process.env.CF_AI_GATEWAY_MODEL) {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         apiKey: process.env.GOOGLE_AI_STUDIO_API_KEY,
         api: 'google-generative-ai',
-        models: [{ id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', contextWindow: 131072, maxTokens: 8192 }],
+        models: [{ id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', contextWindow: 131072, maxTokens: 300 }],
     };
     config.agents = config.agents || {};
     config.agents.defaults = config.agents.defaults || {};
@@ -298,19 +298,17 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
     };
 }
 
-// Tool restrictions for cloud deployment
-// Deny tools that are unavailable or unnecessary in container environment
-// NOTE: cron is intentionally kept enabled for scheduled morning reports
+// Tool restrictions: allow-list only (strip all unused tools to save input tokens)
 config.tools = config.tools || {};
-config.tools.deny = ['browser', 'canvas', 'nodes', 'gateway', 'apply_patch', 'exec', 'agents_list', 'group:sessions'];
-console.log('Denied tools:', config.tools.deny.join(', '));
+config.tools.allow = ['read', 'write', 'edit', 'grep', 'bash', 'process', 'web_search', 'memory_search', 'memory_get', 'message'];
+console.log('Allowed tools:', config.tools.allow.join(', '));
 
 // ---- Token cost optimization ----
 config.agents = config.agents || {};
 config.agents.defaults = config.agents.defaults || {};
 
 // Reduce workspace file injection per message (default 20000)
-config.agents.defaults.bootstrapMaxChars = 5000;
+config.agents.defaults.bootstrapMaxChars = 300;
 
 // Compaction: compress history earlier and harder
 config.agents.defaults.compaction = {
@@ -342,6 +340,28 @@ console.log('Token optimization: bootstrapMaxChars=5000, compaction/pruning tune
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log('Configuration patched successfully');
 EOFPATCH
+
+# ============================================================
+# MINIMIZE WORKSPACE FILES (token optimization)
+# ============================================================
+# OpenClaw auto-injects 6 .md files into every API call.
+# Delete all except a minimal IDENTITY.md to slash input tokens.
+# memory/ directory is preserved (used by memory_search/memory_get).
+WORKSPACE_DIR="/root/clawd"
+mkdir -p "$WORKSPACE_DIR"
+
+cat > "$WORKSPACE_DIR/IDENTITY.md" << 'EOFID'
+收到訊息時先用 memory_search 查詢相關記憶再回答。
+EOFID
+
+rm -f "$WORKSPACE_DIR/SOUL.md" \
+      "$WORKSPACE_DIR/AGENTS.md" \
+      "$WORKSPACE_DIR/USER.md" \
+      "$WORKSPACE_DIR/TOOLS.md" \
+      "$WORKSPACE_DIR/MEMORY.md" \
+      2>/dev/null || true
+
+echo "Workspace minimized: only IDENTITY.md kept ($(wc -c < "$WORKSPACE_DIR/IDENTITY.md") bytes)"
 
 # ============================================================
 # START GATEWAY
